@@ -42,6 +42,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ActivityMain" />
         </activity>
+
+        <service
+            android:name=".BookFetchService"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>
