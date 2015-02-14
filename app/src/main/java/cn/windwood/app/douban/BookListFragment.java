@@ -15,6 +15,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * A fragment representing a list of Items.
@@ -27,6 +28,8 @@ public class BookListFragment extends Fragment implements AbsListView.OnItemClic
     private static final String LOG_TAG = BookListFragment.class.getSimpleName();
 
     static final int BOOK_DOUBAN_LOADER = 1;
+
+//    private static List<Map<String, String>> bookList = new ArrayList<>();
 
     private String[] showColumns = {
             BooksProvider.TITLE,
@@ -47,6 +50,7 @@ public class BookListFragment extends Fragment implements AbsListView.OnItemClic
      * Views.
      */
     private SimpleCursorAdapter mAdapter;
+//    private SimpleAdapter mSimpleAdapter;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -73,6 +77,14 @@ public class BookListFragment extends Fragment implements AbsListView.OnItemClic
                 mToField,
                 0
         );
+
+/*        mSimpleAdapter = new SimpleAdapter(
+                getActivity(),
+                bookList,
+                android.R.layout.two_line_list_item,
+                showColumns,
+                mToField
+        );*/
     }
 
     @Override
@@ -83,6 +95,7 @@ public class BookListFragment extends Fragment implements AbsListView.OnItemClic
         // Set the adapter
         mListView = (AbsListView) view.findViewById(android.R.id.list);
         ((AdapterView<ListAdapter>) mListView).setAdapter(mAdapter);
+//        ((AdapterView<ListAdapter>) mListView).setAdapter(mSimpleAdapter);
 
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
@@ -138,13 +151,29 @@ public class BookListFragment extends Fragment implements AbsListView.OnItemClic
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mAdapter.changeCursor(data);
+        Toast.makeText(
+                getActivity(),
+                "Searched " + mAdapter.getCount() + " books.",
+                Toast.LENGTH_LONG
+        ).show();
         Log.v(LOG_TAG, "Loader (" + loader.toString() + ") return data: " + mAdapter.getCount());
-
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mAdapter.changeCursor(null);
     }
+
+//    public void addBook(Book book) {
+//        Map<String, String> bookItem = new HashMap<>();
+//        bookItem.put(BooksProvider.ISBN, book.isbn);
+//        bookItem.put(BooksProvider.TITLE, book.title);
+//
+//        bookList.add(bookItem);
+//    }
+//
+//    public void clearBook() {
+//        bookList.clear();
+//    }
 
 }

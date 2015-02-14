@@ -1,9 +1,17 @@
 package cn.windwood.app.douban;
 
 import android.app.IntentService;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.util.Log;
+import android.widget.Toast;
 
+import java.util.ArrayList;
+
+import cn.windwood.app.douban.data.Book;
 import cn.windwood.app.douban.util.DoubanApi;
 
 
@@ -28,7 +36,6 @@ public class BookFetchService extends IntentService {
      *
      * @see IntentService
      */
-    // TODO: Customize helper method
     public static void startActionQuery(Context context, String param1, String param2) {
         Intent intent = new Intent(context, BookFetchService.class);
         intent.setAction(ACTION_QUERY_BOOK);
@@ -61,10 +68,36 @@ public class BookFetchService extends IntentService {
      * parameters.
      */
     private void handleActionQuery(String query, String start) {
-        // TODO: Handle action Foo
+        ArrayList<Book> searchResult = new ArrayList<>();
 
-        DoubanApi.parseResult(DoubanApi.fetchBooks(query));
+        notify("Searching books by " + query);
 
-        throw new UnsupportedOperationException("Not yet implemented");
+        try {
+            searchResult = DoubanApi.parseResult(DoubanApi.fetchBooks(query));
+        } catch (Exception e) {
+
+        }
+
+        notify("Got " + searchResult.size() + " books.");
+
+        ContentResolver cr = getBaseContext().getContentResolver();
+
+        for (Book book: searchResult) {
+//            BookListFragment.addBook(book);
+
+            ContentValues values = new ContentValues();
+            values.put(BooksProvider.ISBN, book.isbn);
+            values.put(BooksProvider.TITLE, book.title);
+            values.put(BooksProvider.FAVORITE, 0);
+
+            Uri uri = cr.insert(BooksProvider.CONTENT_URI, values);
+            notify("Book " + book.isbn + " had updated");
+        }
+
+    }
+
+    private void notify(String msg) {
+        Log.v(LOG_TAG, msg);
+        Toast.makeText(getBaseContext(), msg, Toast.LENGTH_SHORT).show();
     }
 }

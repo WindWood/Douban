@@ -103,6 +103,10 @@ public class DoubanApi {
     public static ArrayList<Book> parseResult(String bookListJsonStr) {
         ArrayList<Book> bookList = new ArrayList<>();
 
+        if (bookListJsonStr == null) {
+            return bookList;
+        }
+
         try {
             JSONObject bookListJson = new JSONObject(bookListJsonStr);
 

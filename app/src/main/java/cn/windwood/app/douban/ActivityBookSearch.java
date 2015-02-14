@@ -47,8 +47,14 @@ public class ActivityBookSearch extends ActionBarActivity implements BookSearchF
 
     @Override
     public void onSearchButtonClick(String searchKey) {
+//        bookListFragment.clearBook();
+
         Bundle searchBundle = new Bundle();
         searchBundle.putString("searchKey", searchKey);
+
+        // using service
+//        BookFetchService.startActionQuery(this, searchKey, null);
+
         getSupportLoaderManager().restartLoader(BookListFragment.BOOK_DOUBAN_LOADER, searchBundle, bookListFragment);
     }
 }

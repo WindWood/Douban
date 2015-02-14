@@ -52,6 +52,7 @@
             android:name=".BookFetchService"
             android:exported="false" >
         </service>
+        <receiver android:name=".BookFetchService$AlarmReceiver" android:enabled="true" />
         <service android:name=".sync.DoubanAuthenticatorService" >
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />

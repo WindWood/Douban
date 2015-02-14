@@ -31,31 +31,44 @@ public class BookDoubanLoader extends CursorLoader {
     private String searchKey;
 
     private Context mContext;
+    private ContentResolver mContentResolver;
 
     public BookDoubanLoader(Context context, String searchKey) {
         super(
                 context,
-                URI,
+                BooksProvider.CONTENT_URI,
                 BooksProvider.PROJECTION,
-                null,
+                BooksProvider.TITLE + " like '%" + searchKey + "%'",
                 null,
                 null
         );
+        notify(BooksProvider.TITLE + " like '%" + searchKey + "%'");
         this.mContext = context;
+        this.mContentResolver = context.getContentResolver();
         this.searchKey = searchKey;
     }
 
     @Override
     public Cursor loadInBackground() {
+        Cursor cursor = null;
+
+        deleteCache();
+
         try {
             getBookFromJson(fetchBooks(searchKey));
 
-            return super.loadInBackground();
+            cursor = super.loadInBackground();
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();
         }
-        return null;
+
+        if (null == cursor) {
+            notify("Network connecting error!");
+        } else {
+            notify("load " + cursor.getCount() + " data.");
+        }
+        return cursor;
     }
 
     private String fetchBooks(String... params) {
@@ -68,7 +81,7 @@ public class BookDoubanLoader extends CursorLoader {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
 
-        String bookJsonStr = null;
+        String resultJsonStr = null;
 
         try {
             final String BOOK_BASE_URL = "https://api.douban.com/v2/book/search";
@@ -88,7 +101,7 @@ public class BookDoubanLoader extends CursorLoader {
             InputStream inputStream = urlConnection.getInputStream();
             StringBuffer buffer = new StringBuffer();
             if (inputStream == null) {
-                bookJsonStr = null;
+                resultJsonStr = null;
             }
             reader = new BufferedReader(new InputStreamReader(inputStream));
 
@@ -98,18 +111,18 @@ public class BookDoubanLoader extends CursorLoader {
             }
 
             if (buffer.length() == 0) {
-                bookJsonStr = null;
+                resultJsonStr = null;
             }
 
-            bookJsonStr = buffer.toString();
+            resultJsonStr = buffer.toString();
 
-            Log.v(LOG_TAG, "Fetch Book JSON String: " + bookJsonStr);
+            Log.v(LOG_TAG, "Fetch Book JSON String: " + resultJsonStr);
         } catch (MalformedURLException e) {
             Log.e(LOG_TAG, "(Malformed URI: " + builtUri.toString(), e);
-            bookJsonStr = null;
+            resultJsonStr = null;
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error: ", e);
-            bookJsonStr = null;
+            resultJsonStr = null;
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
@@ -123,37 +136,69 @@ public class BookDoubanLoader extends CursorLoader {
             }
         }
 
-        return bookJsonStr;
+        if (resultJsonStr == null) {
+            notify("Network connecting error!");
+        }
+        return resultJsonStr;
     }
 
-    private void getBookFromJson(String bookJsonStr) throws JSONException {
-        ContentResolver cr = mContext.getContentResolver();
+    private void getBookFromJson(String resultJsonStr) throws JSONException {
+        final String JSON_COUNT = "count";
+        final String JSON_TOTAL = "total";
+        final String JSON_BOOK_LIST = "books";
+        final String JSON_BOOK_TITLE = "title";
+        final String JSON_BOOK_ISBN = "isbn13";
 
-        JSONObject bookJson = new JSONObject(bookJsonStr);
+        if (resultJsonStr == null) {
+            return ;
+        }
 
-        final String BOOK_LIST = "books";
-        final String BOOK_TITLE = "title";
-        final String BOOK_ISBN = "isbn13";
+        JSONObject resultObject = new JSONObject(resultJsonStr);
 
-        JSONArray bookArray = bookJson.getJSONArray(BOOK_LIST);
+        int count = resultObject.getInt(JSON_COUNT);
+        int total = resultObject.getInt(JSON_TOTAL);
+        notify("Got " + count + " of " + total + " books.");
+
+        JSONArray bookArray = resultObject.getJSONArray(JSON_BOOK_LIST);
 
         for (int i = 0; i < bookArray.length(); i++) {
             JSONObject book = bookArray.getJSONObject(i);
 
-            String bookTitle = book.getString(BOOK_TITLE);
-            String bookIsbn = book.getString(BOOK_ISBN);
-            Log.v(LOG_TAG, bookTitle + ">>" + bookIsbn);
+            String bookTitle = book.getString(JSON_BOOK_TITLE);
+            String bookIsbn = book.getString(JSON_BOOK_ISBN);
 
-            ContentValues values = new ContentValues();
-            values.put(BooksProvider.ISBN, bookIsbn);
-            values.put(BooksProvider.TITLE, bookTitle);
-            values.put(BooksProvider.FAVORITE, 0);
-
-            Uri uri = cr.insert(URI, values);
-            Log.v(LOG_TAG, "Insert book " + uri.toString());
-
-//            cr.notifyChange(uri, null);
+            insertBookNotExist(bookIsbn, bookTitle);
         }
+    }
+
+    private void deleteCache() {
+        int count = mContentResolver.delete(
+                URI,
+                BooksProvider.FAVORITE + " = 0",
+                null
+        );
+        notify(BooksProvider.FAVORITE + " = 0");
+        notify("Delete cached item: " + count);
+    }
+
+    private void insertBookNotExist(String isbn, String title) {
+        ContentValues values = new ContentValues();
+        values.put(BooksProvider.ISBN, isbn);
+        values.put(BooksProvider.TITLE, title);
+        values.put(BooksProvider.FAVORITE, 0);
+
+        Uri uri = mContentResolver.insert(URI, values);
+//        mContentResolver.notifyChange(URI, null);
+        Log.v(LOG_TAG, title + "(" + isbn + ") had inserted.");
+    }
+
+    private void notify(String msg) {
+//        Toast.makeText(
+//                mContext,
+//                msg,
+//                Toast.LENGTH_SHORT
+//        ).show();
+        Log.v(LOG_TAG, msg);
     }
 }
 
