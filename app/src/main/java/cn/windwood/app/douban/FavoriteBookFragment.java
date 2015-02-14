@@ -87,7 +87,8 @@ public class FavoriteBookFragment extends Fragment implements AbsListView.OnItem
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
 
-//        setEmptyText("There is no any favorite books, search book first!");
+        mListView.setEmptyView(view.findViewById(android.R.id.empty));
+        setEmptyText(getString(R.string.list_empty_hints_click));
 
         getLoaderManager().initLoader(BOOK_FAVORITE_LOADER, null, this);
 

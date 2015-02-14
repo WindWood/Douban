@@ -87,7 +87,8 @@ public class BookListFragment extends Fragment implements AbsListView.OnItemClic
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
 
-        setEmptyText("NO DATA");
+        mListView.setEmptyView(view.findViewById(android.R.id.empty));
+        setEmptyText(getString(R.string.list_empty_hints));
 
         return view;
     }
