@@ -11,5 +11,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="list_empty_hints_click">Your favorite books not here?\nClick the search icon on the bar and search your book</string>
     <string name="list_empty_hints">No books?\nEnter book title and click search button</string>
+    <string name="sync_account_type">douban.app.windwood.cn</string>
+    <string name="content_authority">cn.windwood.app.douban</string>
 
 </resources>
