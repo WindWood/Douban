@@ -2,26 +2,21 @@ package cn.windwood.app.douban.sync;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.SyncRequest;
 import android.content.SyncResult;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.io.BufferedReader;
 import java.net.HttpURLConnection;
-import java.util.Date;
+
+import cn.windwood.app.douban.R;
+import cn.windwood.app.douban.util.DoubanApi;
 
 /**
  * Created by windwood on 2/13/15.
@@ -93,7 +88,7 @@ public class DoubanSyncAdapter extends AbstractThreadedSyncAdapter {
 
 
     private void notifyWeather() {
-        Context context = getContext();
+/*        Context context = getContext();
         //checking the last update and notify if it' the first of the day
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String displayNotificationsKey = context.getString(R.string.pref_enable_notifications_key);
@@ -166,7 +161,7 @@ public class DoubanSyncAdapter extends AbstractThreadedSyncAdapter {
                     editor.commit();
                 }
             }
-        }
+        }*/
 
     }
 
@@ -245,7 +240,7 @@ public class DoubanSyncAdapter extends AbstractThreadedSyncAdapter {
         /*
          * Since we've created an account
          */
-        SunshineSyncAdapter.configurePeriodicSync(context, SYNC_INTERVAL, SYNC_FLEXTIME);
+        DoubanSyncAdapter.configurePeriodicSync(context, SYNC_INTERVAL, SYNC_FLEXTIME);
 
         /*
          * Without calling setSyncAutomatically, our periodic sync will not be enabled.

@@ -14,7 +14,7 @@ public class DoubanSyncService extends Service {
         Log.d("DoubanSyncService", "onCreate - DoubanSyncService");
         synchronized (sSyncAdapterLock) {
             if (sDoubanSyncAdapter == null) {
-                sDoubanSyncAdapter = new sDoubanSyncAdapter(getApplicationContext(), true);
+                sDoubanSyncAdapter = new DoubanSyncAdapter(getApplicationContext(), true);
             }
         }
     }
