@@ -6,12 +6,12 @@ package cn.windwood.app.douban.data;
 public class Book {
     public String isbn;
     public String title;
-    public boolean favorite;
+//    public boolean favorite;
 
-    public Book(String isbn, String title, boolean favorite) {
+    public Book(String isbn, String title) {
         this.isbn = isbn;
         this.title = title;
-        this.favorite = favorite;
+//        this.favorite = favorite;
     }
 
 }

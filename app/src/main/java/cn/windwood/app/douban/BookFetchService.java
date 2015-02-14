@@ -3,15 +3,7 @@ package cn.windwood.app.douban;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-
-import cn.windwood.app.douban.data.Book;
 import cn.windwood.app.douban.util.DoubanApi;
 
 
@@ -54,12 +46,12 @@ public class BookFetchService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_QUERY_BOOK.equals(action)) {
-                final String param1 = intent.getStringExtra(EXTRA_PARAM_QUERY);
-                String param2 = intent.getStringExtra(EXTRA_PARAM_START);
-                if (param2 == null || param2.isEmpty()) {
-                    param2 = "0";
+                final String query = intent.getStringExtra(EXTRA_PARAM_QUERY);
+                String start = intent.getStringExtra(EXTRA_PARAM_START);
+                if (start == null || start.isEmpty()) {
+                    start = "0";
                 }
-                handleActionFoo(param1, param2);
+                handleActionQuery(query, start);
             }
         }
     }
@@ -68,42 +60,11 @@ public class BookFetchService extends IntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionFoo(String param1, String param2) {
+    private void handleActionQuery(String query, String start) {
         // TODO: Handle action Foo
 
-        getBookFromJson(DoubanApi.fetchBooks(param1));
+        DoubanApi.parseResult(DoubanApi.fetchBooks(query));
 
         throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    private void getBookFromJson(String bookJsonStr) {
-        ArrayList<Book> bookList = new ArrayList<>();
-
-        try {
-            JSONObject bookJson = new JSONObject(bookJsonStr);
-
-            final String BOOK_LIST = "books";
-            final String BOOK_TITLE = "title";
-            final String BOOK_ISBN = "isbn13";
-
-            JSONArray bookArray = bookJson.getJSONArray(BOOK_LIST);
-
-            for (int i = 0; i < bookArray.length(); i++) {
-                JSONObject bookObject = bookArray.getJSONObject(i);
-
-                String bookTitle = bookObject.getString(BOOK_TITLE);
-                String bookIsbn = bookObject.getString(BOOK_ISBN);
-                Log.v(LOG_TAG, bookTitle + ">>" + bookIsbn);
-
-                bookList.add(new Book(bookIsbn, bookTitle, false));
-
-//                ContentValues values = new ContentValues();
-//                values.put(BooksProvider.ISBN, bookIsbn);
-//                values.put(BooksProvider.TITLE, bookTitle);
-//                values.put(BooksProvider.FAVORITE, 0);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
     }
 }
